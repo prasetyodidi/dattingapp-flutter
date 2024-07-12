@@ -1,6 +1,5 @@
 // lib/main.dart
 import 'package:dattingapp_flutter/screeen/ChatScreen.dart';
-import 'package:dattingapp_flutter/screeen/ConversationScreen.dart';
 import 'package:dattingapp_flutter/screeen/LoginScreen.dart';
 import 'package:dattingapp_flutter/screeen/RegisterScreen.dart';
 import 'package:dattingapp_flutter/screeen/ResetPasswordScreen.dart';
@@ -32,11 +31,11 @@ class MyApp extends StatelessWidget {
           '/': (context) => WelcomeScreen(),
           // '/': (context) => ProfileScreen(),
           '/login': (context) => LoginScreen(),
-          '/register': (context) => SignUpScreen(),
+          '/register': (context) => RegisterScreen(),
           '/reset': (context) => ResetPasswordScreen(),
           '/profile': (context) => ProfileScreen(),
           '/chat': (context) => ChatScreen(),
-          '/conversation': (context) => ConversationScreen(),
+          // '/conversation': (context) => ConversationScreen(),
           '/tindering': (context) => TinderingScreen(),
         },
       ),

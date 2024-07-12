@@ -1,6 +1,58 @@
+import 'package:dattingapp_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/api_service.dart';
+import '../models/user.dart';
 
-class TinderingScreen extends StatelessWidget {
+class TinderingScreen extends StatefulWidget {
+  @override
+  _TinderingScreenState createState() => _TinderingScreenState();
+}
+
+class _TinderingScreenState extends State<TinderingScreen> {
+  final ApiService _apiService = ApiService();
+  User? _user;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUser();
+  }
+
+  Future<void> _fetchUser() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final data = await _apiService.fetchUser(authProvider.token!);
+      setState(() {
+        _user = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _handleDislike() {
+    // Add your dislike handling logic here
+    print("User disliked");
+    // Fetch a new user after dislike
+    _fetchUser();
+  }
+
+  void _handleLike() {
+    // Add your like handling logic here
+    print("User liked");
+    // Fetch a new user after like
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _apiService.createChat(_user!.id, authProvider.token!);
+    _fetchUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,8 +62,7 @@ class TinderingScreen extends StatelessWidget {
           children: [
             // Top bar with icons
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -40,23 +91,36 @@ class TinderingScreen extends StatelessWidget {
             // Profile picture and details
             Expanded(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundImage: AssetImage(
-                          'assets/profile_image.png'), // replace with your image asset
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Jon, 24',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    Text('Photographer'),
-                  ],
-                ),
+                child: _isLoading
+                    ? CircularProgressIndicator()
+                    : _error != null
+                        ? Text('Error: $_error')
+                        : _user != null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: MediaQuery.of(context).size.width * 0.8,
+                                    height: MediaQuery.of(context).size.width * 0.8,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                      image: DecorationImage(
+                                        image: NetworkImage(_user!.profileUrl),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    '${_user!.name}, 24',
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text('Photographer'), // Adjust as needed
+                                ],
+                              )
+                            : Text('No user data available'),
               ),
             ),
             // Action buttons
@@ -67,9 +131,7 @@ class TinderingScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: Icon(Icons.close, color: Colors.red, size: 40),
-                    onPressed: () {
-                      // Handle dislike button press
-                    },
+                    onPressed: _handleDislike,
                   ),
                   IconButton(
                     icon: Icon(Icons.star, color: Colors.blue, size: 40),
@@ -79,31 +141,7 @@ class TinderingScreen extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(Icons.favorite, color: Colors.green, size: 40),
-                    onPressed: () {
-                      // Handle like button press
-                    },
-                  ),
-                ],
-              ),
-            ),
-            // Bottom bar with buttons
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle Tinder Gold button press
-                    },
-                    child: Text('GET TINDER GOLD'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle Tinder Plus button press
-                    },
-                    child: Text('GET TINDER PLUS'),
+                    onPressed: _handleLike,
                   ),
                 ],
               ),

@@ -1,19 +1,19 @@
+import 'package:dattingapp_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
-class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginScreen(),
-    );
-  }
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class LoginScreen extends StatelessWidget {
+class _LoginScreenState extends State<LoginScreen> {
+  bool _isSigning = false;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,6 +43,7 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 32.0),
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey[800],
@@ -58,6 +59,7 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 16.0),
               TextField(
                 obscureText: true,
+                controller: _passwordController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey[800],
@@ -89,8 +91,29 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profile');
+                onPressed: () async {
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
+                  
+                  try {
+                    await Provider.of<AuthProvider>(context, listen: false)
+                        .login(email, password);
+
+                    setState(() {
+                      _isSigning = false;
+
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Berhasil login'),
+                      ));
+                      print('berhasil login');
+                      Navigator.pushNamed(context, '/profile');
+                    });
+                  } catch (error) {
+                    print('error login ' + error.toString());
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Failed to login'),
+                    ));
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue, // Background color

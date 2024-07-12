@@ -1,6 +1,20 @@
+import 'package:dattingapp_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class SignUpScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  bool _isSigning = false;
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +45,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               SizedBox(height: 32.0),
               TextField(
+                controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
                   labelStyle: TextStyle(color: Colors.white54),
@@ -44,6 +59,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(color: Colors.white54),
@@ -57,6 +73,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -75,12 +92,34 @@ class SignUpScreen extends StatelessWidget {
               ),
               SizedBox(height: 32.0),
               ElevatedButton(
-                onPressed: () {
-                  // Add your sign-up logic here
+                onPressed: () async {
+                  final name = _nameController.text;
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
+
+                  try {
+                    await Provider.of<AuthProvider>(context, listen: false)
+                        .register(email, password, name);
+
+                    setState(() {
+                      _isSigning = false;
+
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Berhasil login'),
+                      ));
+                      print('berhasil login');
+                      Navigator.pushNamed(context, '/profile');
+                    });
+                  } catch (error) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Failed to login'),
+                    ));
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue, // Background color
-                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),

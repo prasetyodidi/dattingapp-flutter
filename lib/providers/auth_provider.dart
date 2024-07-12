@@ -13,6 +13,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> register(String email, String password, String name) async {
+    _token = await _apiService.register(email, password, name);
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     await _apiService.logout(_token!);
     _token = null;
